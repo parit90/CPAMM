@@ -87,7 +87,7 @@ contract AutomatedMarketMaker {
         return x<=y ? x : y;
     }
 
-    function removeLiquidity() external{
+    function removeLiquidity(uint shares) external returns(uint _amount1, uint _amoun2){
         
     }
 }
