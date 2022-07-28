@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import './IERC20.sol';
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract AutomatedMarketMaker {
     IERC20 public immutable token1;
@@ -56,8 +57,34 @@ contract AutomatedMarketMaker {
         reserve1 = _reserve1;
         reserve2 = _reserve2;
     }
-    function addLiquidity() external{
-        
+    function addLiquidity(uint _amount1, uint _amount2) external returns(uint shares){
+        //pull in token1 and token2
+        token1.transferFrom(msg.sender, address(this), _amount1);
+        token2.transferFrom(msg.sender, address(this), _amount2);
+
+        //dy/dx = y/x
+        if(reserve1 >0 || reserve2 >0){
+            require(reserve1 * _amount2 == reserve2 * _amount1, "dy/dx != y/x");
+        }   
+        if(totalSupply == 0){
+            shares = sqrt(_amount1 * _amount2)
+        } else {
+            share = _min(
+                (_amount1 * totalSupply) / reserve1,
+                (_amount2 * totalSupply) / reserve2,
+            )
+        }
+        require(shares > 0, "share is = 0");
+        _mint(msg.sender, shares)
+
+        _update(
+            token1.balanceOf(address(this));
+            token2.balanceOf(address(this));
+        );
+    }
+
+    function _min(uint x, uint y) private pure returns (uint){
+        return x<=y ? x : y;
     }
 
     function removeLiquidity() external{
